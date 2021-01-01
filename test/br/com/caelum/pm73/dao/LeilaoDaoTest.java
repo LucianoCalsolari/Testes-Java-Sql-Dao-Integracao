@@ -2,6 +2,7 @@ package br.com.caelum.pm73.dao;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Calendar;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -84,7 +85,7 @@ public class LeilaoDaoTest {
 		Usuario mauricio = new Usuario("Mauricio", "mauricio@mauricio.com.br");
 
 		Leilao novo = new Leilao("Geladeira", 1500.00, mauricio, false);
-		Leilao novo2 = new Leilao("Geladeira", 1500.00, mauricio, false);
+		Leilao novo2 = new Leilao("PS5", 1500.00, mauricio, false);
 		Leilao usado = new Leilao("Xbox", 700.00, mauricio, true);
 
 		leilaoDao.salvar(novo);
@@ -96,6 +97,35 @@ public class LeilaoDaoTest {
 
 		assertEquals(2, leiloesNovos.size());
 		assertEquals("Geladeira", leiloesNovos.get(0).getNome());
+	}
+	
+	@Test
+	public void deveRetornarLeiloesMaisAntigosQueUmaSemana() {
+
+		Usuario mauricio = new Usuario("Mauricio", "mauricio@mauricio.com.br");
+
+		Leilao antigo = new Leilao("Geladeira", 1500.00, mauricio, false);
+		Leilao novo = new Leilao("Xbox", 100.00, mauricio, false);
+		Leilao novo2 = new Leilao("PS5", 5000.00, mauricio, false);
+		
+		Calendar dataNova = Calendar.getInstance();
+		
+		Calendar dataAntiga =  Calendar.getInstance();
+		dataAntiga.add(Calendar.DAY_OF_MONTH,-7);
+		
+		antigo.setDataAbertura(dataAntiga);
+		novo.setDataAbertura(dataNova);
+		novo2.setDataAbertura(dataNova);
+		
+		leilaoDao.salvar(antigo);
+		leilaoDao.salvar(novo);
+		leilaoDao.salvar(novo2);
+
+		usuarioDao.salvar(mauricio);
+		
+		List<Leilao> leiloesAntigos = leilaoDao.antigos();
+
+		assertEquals(1, leiloesAntigos.size());
 	}
 
 }
