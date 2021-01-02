@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import br.com.caelum.pm73.dominio.Leilao;
 import br.com.caelum.pm73.dominio.Usuario;
+import junit.framework.Assert;
 
 public class LeilaoDaoTest {
 
@@ -63,13 +64,13 @@ public class LeilaoDaoTest {
 	@Test
 	public void deveRetornarNenhumLeilaoAtivo() {
 
-		Usuario mauricio = new Usuario("Mauricio", "mauricio@mauricio.com.br");
+		Usuario mauricio = new UsuarioBuilder().comNome("Mauricio").comEmail("mauricio@mauricio.com.br").constroi();
 
-		Leilao encerrado1 = new Leilao("Geladeira", 1500.00, mauricio, false);
-		Leilao encerrado2 = new Leilao("Xbox", 700.00, mauricio, false);
+		Leilao encerrado1 = new LeilaoBuilder().comNome("Geladeira").comValor(1500.00).comDono(mauricio).setEncerrado()
+				.constroi();
 
-		encerrado1.encerra();
-		encerrado2.encerra();
+		Leilao encerrado2 = new LeilaoBuilder().comNome("Xbox").comValor(700.00).comDono(mauricio).setEncerrado()
+				.constroi();
 
 		usuarioDao.salvar(mauricio);
 		leilaoDao.salvar(encerrado1);
@@ -83,11 +84,12 @@ public class LeilaoDaoTest {
 	@Test
 	public void deveRetornarLeiloesNovos() {
 
-		Usuario mauricio = new Usuario("Mauricio", "mauricio@mauricio.com.br");
+		Usuario mauricio = new UsuarioBuilder().comNome("Mauricio").comEmail("mauricio@mauricio.com.br").constroi();
 
-		Leilao novo = new Leilao("Geladeira", 1500.00, mauricio, false);
-		Leilao novo2 = new Leilao("PS5", 1500.00, mauricio, false);
-		Leilao usado = new Leilao("Xbox", 700.00, mauricio, true);
+		Leilao novo = new LeilaoBuilder().comNome("Geladeira").comValor(1500.00).comDono(mauricio).constroi();
+		Leilao novo2 = new LeilaoBuilder().comNome("PS5").comValor(1500.00).comDono(mauricio).constroi();
+		Leilao usado = new LeilaoBuilder().comNome("Xbox").comValor(700.00).comDono(mauricio).setEncerrado().usado(true)
+				.constroi();
 
 		leilaoDao.salvar(novo);
 		leilaoDao.salvar(novo2);
@@ -103,11 +105,11 @@ public class LeilaoDaoTest {
 	@Test
 	public void deveRetornarLeiloesMaisAntigosQueUmaSemana() {
 
-		Usuario mauricio = new Usuario("Mauricio", "mauricio@mauricio.com.br");
+		Usuario mauricio = new UsuarioBuilder().comNome("Mauricio").comEmail("mauricio@mauricio.com.br").constroi();
 
-		Leilao antigo = new Leilao("Geladeira", 1500.00, mauricio, false);
-		Leilao novo = new Leilao("Xbox", 100.00, mauricio, false);
-		Leilao novo2 = new Leilao("PS5", 5000.00, mauricio, false);
+		Leilao antigo = new LeilaoBuilder().comNome("Geladeira").comValor(1500.00).comDono(mauricio).constroi();
+		Leilao novo2 = new LeilaoBuilder().comNome("PS5").comValor(5000.00).comDono(mauricio).constroi();
+		Leilao novo = new LeilaoBuilder().comNome("Xbox").comValor(700.00).comDono(mauricio).constroi();
 
 		Calendar dataNova = Calendar.getInstance();
 
@@ -209,6 +211,79 @@ public class LeilaoDaoTest {
 		List<Leilao> leiloes = leilaoDao.porPeriodo(comecoDoIntervalo, fimDoIntervalo);
 
 		assertEquals(0, leiloes.size());
+	}
+
+	@Test
+	public void deveRetornarLeiloesNaoEncerradosComMaisDeTresLancesComValor() {
+
+		Usuario mauricio = new UsuarioBuilder().comNome("Mauricio").comEmail("mauricio@mauricio.com.br").constroi();
+		Usuario marcos = new UsuarioBuilder().comNome("Marcos").comEmail("marcos@marcos.com.br").constroi();
+
+		Leilao leilao1 = new LeilaoBuilder().comNome("Geladeira").comValor(1500.00).comDono(mauricio)
+				.comLance(Calendar.getInstance(), mauricio, 3000.0).comLance(Calendar.getInstance(), marcos, 4000.0)
+				.constroi();
+
+		Leilao leilao2 = new LeilaoBuilder().comNome("PS5").comValor(3000.00)
+				.comLance(Calendar.getInstance(), mauricio, 3000.0).comLance(Calendar.getInstance(), marcos, 3100.0)
+				.comLance(Calendar.getInstance(), marcos, 3200.0).comLance(Calendar.getInstance(), marcos, 3300.0)
+				.comLance(Calendar.getInstance(), mauricio, 3400.0).comLance(Calendar.getInstance(), marcos, 3500.0)
+				.comDono(mauricio).constroi();
+
+		usuarioDao.salvar(mauricio);
+		usuarioDao.salvar(marcos);
+
+		leilaoDao.salvar(leilao1);
+		leilaoDao.salvar(leilao2);
+
+		List<Leilao> leiloesNaoEncerrados = leilaoDao.disputadosEntre(2000, 4000);
+		assertEquals(1, leiloesNaoEncerrados.size());
+	}
+
+	@Test
+	public void deveRetornarNumeroDeLeiloesDoUsuario() {
+
+		Usuario mauricio = new UsuarioBuilder().comNome("Mauricio").comEmail("mauricio@mauricio.com.br").constroi();
+		Usuario marcos = new UsuarioBuilder().comNome("Marcos").comEmail("marcos@marcos.com.br").constroi();
+
+		Leilao leilao1 = new LeilaoBuilder().comNome("Geladeira").comValor(1500.00).comDono(mauricio)
+				.comLance(Calendar.getInstance(), marcos, 3000.0).comLance(Calendar.getInstance(), marcos, 4000.0)
+				.constroi();
+
+		Leilao leilao2 = new LeilaoBuilder().comNome("PS5").comValor(3000.00)
+				.comLance(Calendar.getInstance(), mauricio, 3000.0).comLance(Calendar.getInstance(), marcos, 3100.0)
+				.comLance(Calendar.getInstance(), marcos, 3200.0).comLance(Calendar.getInstance(), marcos, 3300.0)
+				.comDono(mauricio).constroi();
+
+		usuarioDao.salvar(mauricio);
+		usuarioDao.salvar(marcos);
+
+		leilaoDao.salvar(leilao1);
+		leilaoDao.salvar(leilao2);
+
+		List<Leilao> leiloesDoUsuario = leilaoDao.listaLeiloesDoUsuario(mauricio);
+		assertEquals(1, leiloesDoUsuario.size());
+	}
+
+	@Test
+	public void deveDeletarUsuario() {
+
+		Usuario mauricio = new UsuarioBuilder().comNome("Mauricio").comEmail("mauricio@mauricio.com.br").constroi();
+		
+		usuarioDao.salvar(mauricio);
+		usuarioDao.deletar(mauricio);
+
+		/**
+		 * @author L
+		 *  
+		 * Para garantir que o banco salvou mesmo 
+		 * */
+		session.flush();
+		session.clear();
+
+		Usuario deletado = usuarioDao.porNomeEEmail("Mauricio", "mauricio@mauricio.com.br");
+		
+		
+		Assert.assertNull(deletado);
 	}
 
 }
