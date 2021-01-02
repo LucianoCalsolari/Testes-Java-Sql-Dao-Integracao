@@ -128,4 +128,31 @@ public class LeilaoDaoTest {
 		assertEquals(1, leiloesAntigos.size());
 	}
 
+	@Test
+	public void deveRetornarApenasLeiloesComMenosDe7Dias() {
+
+		Usuario mauricio = new Usuario("Mauricio", "mauricio@mauricio.com.br");
+
+		Leilao antigo = new Leilao("Geladeira", 1500.00, mauricio, false);
+		Leilao novo = new Leilao("PS5", 5000.00, mauricio, false);
+		
+		Calendar dataLimite =  Calendar.getInstance();
+		Calendar dataDeHoje =  Calendar.getInstance();
+		Calendar dataAntiga =  Calendar.getInstance();
+		
+		dataAntiga.add(Calendar.DAY_OF_WEEK, -8);
+		dataLimite.add(Calendar.DAY_OF_WEEK, -7);
+		
+		antigo.setDataAbertura(dataAntiga);
+		novo.setDataAbertura(dataLimite);
+		
+		leilaoDao.salvar(antigo);
+		leilaoDao.salvar(novo);
+		
+		usuarioDao.salvar(mauricio);
+
+		List<Leilao> leiloesNovos = leilaoDao.porPeriodo(dataLimite , dataDeHoje );
+		
+		assertEquals(1, leiloesNovos.size());
+	}
 }
