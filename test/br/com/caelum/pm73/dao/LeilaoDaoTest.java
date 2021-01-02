@@ -98,7 +98,7 @@ public class LeilaoDaoTest {
 		assertEquals(2, leiloesNovos.size());
 		assertEquals("Geladeira", leiloesNovos.get(0).getNome());
 	}
-	
+
 	@Test
 	public void deveRetornarLeiloesMaisAntigosQueUmaSemana() {
 
@@ -107,22 +107,22 @@ public class LeilaoDaoTest {
 		Leilao antigo = new Leilao("Geladeira", 1500.00, mauricio, false);
 		Leilao novo = new Leilao("Xbox", 100.00, mauricio, false);
 		Leilao novo2 = new Leilao("PS5", 5000.00, mauricio, false);
-		
+
 		Calendar dataNova = Calendar.getInstance();
-		
-		Calendar dataAntiga =  Calendar.getInstance();
-		dataAntiga.add(Calendar.DAY_OF_MONTH,-7);
-		
+
+		Calendar dataAntiga = Calendar.getInstance();
+		dataAntiga.add(Calendar.DAY_OF_MONTH, -7);
+
 		antigo.setDataAbertura(dataAntiga);
 		novo.setDataAbertura(dataNova);
 		novo2.setDataAbertura(dataNova);
-		
+
 		leilaoDao.salvar(antigo);
 		leilaoDao.salvar(novo);
 		leilaoDao.salvar(novo2);
 
 		usuarioDao.salvar(mauricio);
-		
+
 		List<Leilao> leiloesAntigos = leilaoDao.antigos();
 
 		assertEquals(1, leiloesAntigos.size());
@@ -135,24 +135,78 @@ public class LeilaoDaoTest {
 
 		Leilao antigo = new Leilao("Geladeira", 1500.00, mauricio, false);
 		Leilao novo = new Leilao("PS5", 5000.00, mauricio, false);
-		
-		Calendar dataLimite =  Calendar.getInstance();
-		Calendar dataDeHoje =  Calendar.getInstance();
-		Calendar dataAntiga =  Calendar.getInstance();
-		
+
+		Calendar dataLimite = Calendar.getInstance();
+		Calendar dataDeHoje = Calendar.getInstance();
+		Calendar dataAntiga = Calendar.getInstance();
+
 		dataAntiga.add(Calendar.DAY_OF_WEEK, -8);
 		dataLimite.add(Calendar.DAY_OF_WEEK, -7);
-		
+
 		antigo.setDataAbertura(dataAntiga);
 		novo.setDataAbertura(dataLimite);
-		
+
 		leilaoDao.salvar(antigo);
 		leilaoDao.salvar(novo);
-		
+
 		usuarioDao.salvar(mauricio);
 
-		List<Leilao> leiloesNovos = leilaoDao.porPeriodo(dataLimite , dataDeHoje );
-		
+		List<Leilao> leiloesNovos = leilaoDao.porPeriodo(dataLimite, dataDeHoje);
+
 		assertEquals(1, leiloesNovos.size());
+	}
+
+	@Test
+	public void deveTrazerLeiloesNaoEncerradosNoPeriodo() {
+
+		Calendar comecoDoIntervalo = Calendar.getInstance();
+		comecoDoIntervalo.add(Calendar.DAY_OF_MONTH, -10);
+
+		Calendar fimDoIntervalo = Calendar.getInstance();
+
+		Usuario mauricio = new Usuario("Mauricio", "mauricio@mauricio.com.br");
+
+		Leilao leilao1 = new Leilao("Geladeira", 1500.00, mauricio, false);
+		Leilao leilao2 = new Leilao("PS5", 5000.00, mauricio, false);
+
+		Calendar dataDoLeilao1 = Calendar.getInstance();
+		dataDoLeilao1.add(Calendar.DAY_OF_MONTH, -2);
+		leilao1.setDataAbertura(dataDoLeilao1);
+
+		Calendar dataDoLeilao2 = Calendar.getInstance();
+		dataDoLeilao2.add(Calendar.DAY_OF_MONTH, -20);
+		leilao2.setDataAbertura(dataDoLeilao2);
+
+		usuarioDao.salvar(mauricio);
+		leilaoDao.salvar(leilao1);
+		leilaoDao.salvar(leilao2);
+
+		List<Leilao> leiloes = leilaoDao.porPeriodo(comecoDoIntervalo, fimDoIntervalo);
+
+		assertEquals(1, leiloes.size());
+		assertEquals("Geladeira", leiloes.get(0).getNome());
+	}
+
+	@Test
+	public void naoDeveTrazerLeiloesEncerradosNoPeriodo() {
+		Calendar comecoDoIntervalo = Calendar.getInstance();
+		comecoDoIntervalo.add(Calendar.DAY_OF_MONTH, -10);
+
+		Calendar fimDoIntervalo = Calendar.getInstance();
+
+		Usuario mauricio = new Usuario("Mauricio", "mauricio@mauricio.com.br");
+
+		Leilao leilao1 = new Leilao("Geladeira", 1500.00, mauricio, false);
+		Calendar dataDoLeilao1 = Calendar.getInstance();
+		dataDoLeilao1.add(Calendar.DAY_OF_MONTH, -2);
+		leilao1.setDataAbertura(dataDoLeilao1);
+		leilao1.encerra();
+
+		usuarioDao.salvar(mauricio);
+		leilaoDao.salvar(leilao1);
+
+		List<Leilao> leiloes = leilaoDao.porPeriodo(comecoDoIntervalo, fimDoIntervalo);
+
+		assertEquals(0, leiloes.size());
 	}
 }
