@@ -45,12 +45,13 @@ public class LeilaoDaoTest {
 
 		Usuario mauricio = new Usuario("Mauricio", "mauricio@mauricio.com.br");
 
-		Leilao ativo = new Leilao("Geladeira", 1500.00, mauricio, false);
-		Leilao encerrado = new Leilao("Xbox", 700.00, mauricio, false);
+		Leilao ativo = new LeilaoBuilder().comNome("Geladeira").comValor(1500.00).comDono(mauricio).constroi();
 
-		encerrado.encerra();
+		Leilao encerrado = new LeilaoBuilder().comNome("Xbox").comValor(700.00).comDono(mauricio).setEncerrado()
+				.constroi();
 
 		usuarioDao.salvar(mauricio);
+
 		leilaoDao.salvar(ativo);
 		leilaoDao.salvar(encerrado);
 
@@ -209,4 +210,5 @@ public class LeilaoDaoTest {
 
 		assertEquals(0, leiloes.size());
 	}
+
 }
