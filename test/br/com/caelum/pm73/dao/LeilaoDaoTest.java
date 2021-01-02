@@ -43,7 +43,7 @@ public class LeilaoDaoTest {
 	@Test
 	public void deveContarLeiloesNaoEncerrados() {
 
-		Usuario mauricio = new Usuario("Mauricio", "mauricio@mauricio.com.br");
+		Usuario mauricio = new UsuarioBuilder().comNome("Mauricio").comEmail("mauricio@mauricio.com.br").constroi();
 
 		Leilao ativo = new LeilaoBuilder().comNome("Geladeira").comValor(1500.00).comDono(mauricio).constroi();
 
