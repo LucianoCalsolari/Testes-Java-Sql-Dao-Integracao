@@ -309,4 +309,46 @@ public class LeilaoDaoTest {
 		assertEquals(3000, valorMedio, 0.00001);
 	}
 
+	@Test
+	public void deveRetornarValorInicialMedioDosLeiloesQueTemLances() {
+
+		Usuario mauricio = new UsuarioBuilder().comNome("Mauricio").comEmail("mauricio@mauricio.com.br").constroi();
+
+		Leilao leilao1 = new LeilaoBuilder().comNome("Geladeira").comValor(1000.00).comDono(mauricio)
+				.comLance(Calendar.getInstance(), mauricio, 1000.0).constroi();
+
+		Leilao leilao2 = new LeilaoBuilder().comNome("PS5").comValor(2000.00)
+				.comLance(Calendar.getInstance(), mauricio, 3000.0).comDono(mauricio).constroi();
+
+		Leilao leilao3 = new LeilaoBuilder().comNome("Xbox").comValor(4500.00).comDono(mauricio).constroi();
+
+		usuarioDao.salvar(mauricio);
+
+		leilaoDao.salvar(leilao1);
+		leilaoDao.salvar(leilao2);
+		leilaoDao.salvar(leilao3);
+
+		double valorMedio = leilaoDao.getValorInicialMedioDoUsuario(mauricio);
+		assertEquals(1500, valorMedio, 0.00001);
+	}
+
+	@Test
+	public void deveDeletarLeilao() {
+
+		Usuario mauricio = new UsuarioBuilder().comNome("Mauricio").comEmail("mauricio@mauricio.com.br").constroi();
+
+		Leilao leilao1 = new LeilaoBuilder().comNome("Geladeira").comValor(1000.00).comDono(mauricio)
+				.comLance(Calendar.getInstance(), mauricio, 1000.0).constroi();
+
+		leilaoDao.salvar(leilao1);
+		usuarioDao.salvar(mauricio);
+		leilaoDao.deleta(leilao1);
+		usuarioDao.deletar(mauricio);
+
+		session.flush();
+		session.clear();
+
+		Assert.assertNull(leilaoDao.porId(leilao1.getId()));
+	}
+
 }
