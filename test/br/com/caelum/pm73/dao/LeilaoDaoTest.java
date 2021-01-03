@@ -1,6 +1,8 @@
 package br.com.caelum.pm73.dao;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.Calendar;
 import java.util.List;
@@ -351,4 +353,24 @@ public class LeilaoDaoTest {
 		Assert.assertNull(leilaoDao.porId(leilao1.getId()));
 	}
 
+	@Test
+	public void deveAlterarDadosDeUsuario() {
+
+		Usuario mauricio = new UsuarioBuilder().comNome("Mauricio").comEmail("mauricio@mauricio.com.br").constroi();
+
+		usuarioDao.salvar(mauricio);
+
+		mauricio.setNome("Mauricio Rodrigues");
+		mauricio.setEmail("rod@rodrigues.com.br");
+
+		usuarioDao.atualizar(mauricio);
+		session.flush();
+		session.clear();
+
+		Usuario usuarioAntigo = usuarioDao.porNomeEEmail("Mauricio", "mauricio@mauricio.com.br");
+		Usuario usuarioNovo = usuarioDao.porNomeEEmail("Mauricio Rodrigues", "rod@rodrigues.com.br");
+
+		assertNotNull(usuarioNovo);
+		assertNull(usuarioAntigo);
+	}
 }
