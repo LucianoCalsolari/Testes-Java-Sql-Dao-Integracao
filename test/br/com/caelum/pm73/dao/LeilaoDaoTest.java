@@ -350,7 +350,7 @@ public class LeilaoDaoTest {
 		session.flush();
 		session.clear();
 
-		Assert.assertNull(leilaoDao.porId(leilao1.getId()));
+		assertNull(leilaoDao.porId(leilao1.getId()));
 	}
 
 	@Test
